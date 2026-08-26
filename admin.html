@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stock Manager — Northgate Autos</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="hazard"></div>
+
+<div class="topbar">
+  <div class="shell">
+    <span class="open-now"><i></i> Signed in as: Workshop Owner</span>
+    <span class="tb-right"><a href="index.html">View the live site</a></span>
+  </div>
+</div>
+
+<header class="site">
+  <div class="shell">
+    <a class="logo" href="index.html">
+      <span class="mark">N</span>
+      <span class="wordmark">Northgate<span>Autos · Stock Manager</span></span>
+    </a>
+    <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <nav class="main" id="nav">
+      <a href="index.html">Home</a>
+      <a href="cars.html">Cars for Sale</a>
+      <a href="admin.html" aria-current="page">Stock Manager</a>
+    </nav>
+    <div class="head-cta">
+      <a class="btn btn--sm" href="cars.html">See the public page</a>
+    </div>
+  </div>
+</header>
+
+<div class="pagehead">
+  <div class="shell inner">
+    <div class="crumbs"><a href="index.html">Home</a> / Stock manager</div>
+    <h1>Stock manager</h1>
+    <p class="lede">This is how you would run the forecourt yourself — no developer, no code. Flick the switch to stamp a car SOLD, or remove it from the site completely. Then open the Cars for Sale page and you will see the change straight away.</p>
+  </div>
+</div>
+
+<section>
+  <div class="shell admin-wrap">
+
+    <div class="notice">
+      <b>Try it:</b> toggle a car to SOLD below, then click <a href="cars.html" style="text-decoration:underline">Cars for Sale</a>. The card greys out with a SOLD stamp, drops off the home page and stops counting towards "available now". Everything you change here is remembered.
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Vehicles on the forecourt</h3>
+        <span class="hint" id="summary"></span>
+      </div>
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Price</th>
+            <th>MOT</th>
+            <th>Status</th>
+            <th style="text-align:right">Mark as sold</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Add a vehicle</h3>
+        <span class="hint">In the live build this is a simple form: photos, specs, price — then Publish</span>
+      </div>
+      <div style="padding:24px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+          <label class="hint">Make<br><input disabled placeholder="Ford" style="width:100%;margin-top:6px;background:var(--steel-800);border:1px solid var(--line);color:var(--fog);padding:11px;border-radius:3px;font-family:var(--body)"></label>
+          <label class="hint">Model<br><input disabled placeholder="Fiesta" style="width:100%;margin-top:6px;background:var(--steel-800);border:1px solid var(--line);color:var(--fog);padding:11px;border-radius:3px;font-family:var(--body)"></label>
+          <label class="hint">Year<br><input disabled placeholder="2016" style="width:100%;margin-top:6px;background:var(--steel-800);border:1px solid var(--line);color:var(--fog);padding:11px;border-radius:3px;font-family:var(--body)"></label>
+          <label class="hint">Price<br><input disabled placeholder="£5,995" style="width:100%;margin-top:6px;background:var(--steel-800);border:1px solid var(--line);color:var(--fog);padding:11px;border-radius:3px;font-family:var(--body)"></label>
+        </div>
+        <p class="hint" style="margin:18px 0 0">Photos are drag-and-drop, the specs are plain text boxes, and the vehicle appears on the site as soon as you hit Publish. Disabled here because this is a front-end demo — the real one saves to your database.</p>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn btn--ghost" id="reset">Reset the demo stock</button>
+      <a class="btn btn--dark" href="cars.html">Open Cars for Sale</a>
+    </div>
+
+  </div>
+</section>
+
+<footer class="site">
+  <div class="shell">
+    <div class="foot-base" style="border-top:0">
+      <span>© 2026 Northgate Autos — demo build</span>
+      <span>Stock manager · front-end demo</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/stock.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+  let stock = loadStock();
+
+  function draw() {
+    document.getElementById("rows").innerHTML = stock.map(c => `
+      <tr class="${c.sold ? "is-sold" : ""}">
+        <td>
+          <span class="veh">
+            <img src="assets/img/${c.photos[0]}" alt="">
+            <span><b>${c.year} ${c.make} ${c.model}</b><span>${c.trim} · ${miles(c.mileage)} · ${c.reg}</span></span>
+          </span>
+        </td>
+        <td class="num">${money(c.price)}</td>
+        <td>${c.mot}</td>
+        <td><span class="pill ${c.sold ? "gone" : "live"}">${c.sold ? "Sold" : "For sale"}</span></td>
+        <td style="text-align:right">
+          <button class="toggle" role="switch" aria-pressed="${c.sold}" data-sold="${c.id}" aria-label="Mark as sold"></button>
+        </td>
+        <td>
+          <span class="row-acts">
+            <a class="btn btn--dark btn--sm" href="car.html?id=${c.id}">View</a>
+            <button class="btn btn--ghost btn--sm" data-remove="${c.id}">Remove</button>
+          </span>
+        </td>
+      </tr>`).join("");
+
+    const avail = stock.filter(c => !c.sold).length;
+    document.getElementById("summary").textContent =
+      stock.length + " vehicles · " + avail + " for sale · " + (stock.length - avail) + " sold";
+  }
+
+  document.getElementById("rows").addEventListener("click", e => {
+    const t = e.target.closest("[data-sold]");
+    const r = e.target.closest("[data-remove]");
+    if (t) {
+      const car = stock.find(c => c.id === t.dataset.sold);
+      car.sold = !car.sold;
+      saveStock(stock.concat([]));
+      draw();
+    }
+    if (r) {
+      const car = stock.find(c => c.id === r.dataset.remove);
+      if (!confirm("Remove the " + car.year + " " + car.make + " " + car.model + " from the website?")) return;
+      car.removed = true;
+      saveStock(stock.concat([]));
+      stock = stock.filter(c => !c.removed);
+      draw();
+    }
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    resetStock();
+    stock = loadStock();
+    draw();
+  });
+
+  draw();
+</script>
+</body>
+</html>
